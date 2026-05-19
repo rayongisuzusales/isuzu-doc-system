@@ -1,0 +1,2004 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบส่งและตรวจสอบเอกสาร - ชลบุรีอีซูซุ</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #1a3c6e;
+    --primary-light: #2558a8;
+    --accent: #e8a020;
+    --accent-light: #f5c050;
+    --success: #1e7e4a;
+    --success-bg: #e8f5ed;
+    --warning: #b85c00;
+    --warning-bg: #fff3e0;
+    --danger: #c0392b;
+    --danger-bg: #fdecea;
+    --info: #1565c0;
+    --info-bg: #e3f2fd;
+    --gray-100: #f8f9fa;
+    --gray-200: #e9ecef;
+    --gray-300: #dee2e6;
+    --gray-400: #ced4da;
+    --gray-500: #adb5bd;
+    --gray-600: #6c757d;
+    --gray-700: #495057;
+    --gray-800: #343a40;
+    --gray-900: #212529;
+    --white: #ffffff;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 20px rgba(0,0,0,0.12);
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: #f0f4f8;
+    color: var(--gray-900);
+    font-size: 15px;
+    min-height: 100vh;
+  }
+
+  /* ===== MODAL OVERLAY ===== */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-md);
+  }
+  .modal h3 { font-family: 'Kanit', sans-serif; color: var(--primary); margin-bottom: 1.5rem; font-size: 1.2rem; }
+
+  /* ===== LOGIN SCREEN ===== */
+  #login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1a3c6e 0%, #2558a8 50%, #1a3c6e 100%);
+  }
+  .login-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    width: 380px;
+    box-shadow: var(--shadow-md);
+  }
+  .login-logo {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .login-logo .logo-badge {
+    background: var(--primary);
+    color: white;
+    font-family: 'Kanit', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    padding: 0.8rem 1.4rem;
+    border-radius: var(--radius);
+    display: inline-block;
+    letter-spacing: 2px;
+  }
+  .login-logo .logo-sub {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--gray-600);
+    margin-top: 0.5rem;
+  }
+  .login-title {
+    text-align: center;
+    font-family: 'Kanit', sans-serif;
+    color: var(--primary);
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+  }
+
+  /* ===== FORM ELEMENTS ===== */
+  .form-group { margin-bottom: 1rem; }
+  .form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 0.4rem;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.6rem 0.9rem;
+    border: 1.5px solid var(--gray-300);
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    font-family: 'Sarabun', sans-serif;
+    transition: border-color 0.2s;
+    background: var(--white);
+    color: var(--gray-900);
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-light);
+  }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.55rem 1.2rem;
+    border-radius: var(--radius);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-light); }
+  .btn-success { background: var(--success); color: white; }
+  .btn-success:hover { background: #156035; }
+  .btn-warning { background: var(--warning); color: white; }
+  .btn-warning:hover { background: #934900; }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-danger:hover { background: #922b21; }
+  .btn-outline {
+    background: transparent;
+    border: 1.5px solid var(--gray-300);
+    color: var(--gray-700);
+  }
+  .btn-outline:hover { background: var(--gray-100); }
+  .btn-sm { padding: 0.35rem 0.8rem; font-size: 0.8rem; }
+  .btn-full { width: 100%; justify-content: center; }
+
+  /* ===== MAIN APP ===== */
+  #app { display: none; min-height: 100vh; }
+  #app.active { display: block; }
+
+  /* ===== NAVBAR ===== */
+  .navbar {
+    background: var(--primary);
+    color: white;
+    padding: 0 1.5rem;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  .navbar-brand .brand-icon {
+    background: var(--accent);
+    color: var(--primary);
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .user-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.12);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+  }
+  .role-tag {
+    font-size: 0.7rem;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .role-admin { background: var(--accent); color: var(--primary); }
+  .role-clerk { background: #4fc3f7; color: #01579b; }
+  .role-sales { background: #a5d6a7; color: #1b5e20; }
+
+  /* ===== SIDEBAR + CONTENT ===== */
+  .app-body {
+    display: flex;
+    min-height: calc(100vh - 58px);
+  }
+  .sidebar {
+    width: 230px;
+    background: var(--white);
+    border-right: 1px solid var(--gray-200);
+    padding: 1rem 0;
+    flex-shrink: 0;
+  }
+  .nav-section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--gray-500);
+    padding: 0.6rem 1.2rem 0.3rem;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.6rem 1.2rem;
+    color: var(--gray-700);
+    cursor: pointer;
+    font-size: 0.9rem;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  .nav-item:hover { background: var(--gray-100); color: var(--primary); }
+  .nav-item.active {
+    background: #e8f0fb;
+    color: var(--primary);
+    border-left-color: var(--primary);
+    font-weight: 600;
+  }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .main-content {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-x: auto;
+  }
+
+  /* ===== PAGE HEADER ===== */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+  .page-header h2 {
+    font-family: 'Kanit', sans-serif;
+    font-size: 1.3rem;
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .page-header p {
+    font-size: 0.85rem;
+    color: var(--gray-600);
+    margin-top: 2px;
+  }
+
+  /* ===== STATS CARDS ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .stat-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 1.1rem 1.2rem;
+    box-shadow: var(--shadow);
+  }
+  .stat-card .stat-label {
+    font-size: 0.78rem;
+    color: var(--gray-600);
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+  }
+  .stat-card .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    font-family: 'Kanit', sans-serif;
+  }
+  .stat-card .stat-sub {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    margin-top: 2px;
+  }
+  .stat-blue .stat-value { color: var(--info); }
+  .stat-green .stat-value { color: var(--success); }
+  .stat-amber .stat-value { color: var(--warning); }
+  .stat-red .stat-value { color: var(--danger); }
+
+  /* ===== CARD ===== */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 1.2rem;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid var(--gray-200);
+    background: var(--gray-100);
+  }
+  .card-header h3 {
+    font-family: 'Kanit', sans-serif;
+    font-size: 0.95rem;
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .card-body { padding: 1.2rem; }
+
+  /* ===== TABLE ===== */
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+  th {
+    background: var(--gray-100);
+    color: var(--gray-700);
+    font-weight: 600;
+    padding: 0.65rem 0.9rem;
+    text-align: left;
+    border-bottom: 2px solid var(--gray-200);
+    font-size: 0.82rem;
+    white-space: nowrap;
+  }
+  td {
+    padding: 0.65rem 0.9rem;
+    border-bottom: 1px solid var(--gray-100);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--gray-100); }
+
+  /* ===== BADGES / STATUS ===== */
+  .badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-success { background: var(--success-bg); color: var(--success); }
+  .badge-warning { background: var(--warning-bg); color: var(--warning); }
+  .badge-danger { background: var(--danger-bg); color: var(--danger); }
+  .badge-info { background: var(--info-bg); color: var(--info); }
+  .badge-gray { background: var(--gray-200); color: var(--gray-700); }
+  .badge-primary { background: #e8f0fb; color: var(--primary); }
+
+  /* ===== FILTER BAR ===== */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+  .filter-bar input,
+  .filter-bar select {
+    padding: 0.45rem 0.8rem;
+    border: 1.5px solid var(--gray-300);
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    font-family: 'Sarabun', sans-serif;
+    background: var(--white);
+    min-width: 150px;
+  }
+
+  /* ===== UPLOAD ZONE ===== */
+  .upload-zone {
+    border: 2px dashed var(--gray-300);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--gray-100);
+  }
+  .upload-zone:hover { border-color: var(--primary-light); background: #e8f0fb; }
+  .upload-zone .upload-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+  .upload-zone p { font-size: 0.85rem; color: var(--gray-600); }
+
+  /* ===== FILE ITEM ===== */
+  .file-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.6rem 0.8rem;
+    background: var(--gray-100);
+    border-radius: var(--radius);
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+  }
+  .file-item .file-icon { font-size: 1.1rem; }
+  .file-item .file-name { flex: 1; }
+  .file-item .file-remove { cursor: pointer; color: var(--danger); font-size: 1rem; }
+
+  /* ===== CHECKLIST ===== */
+  .checklist { list-style: none; }
+  .checklist li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--gray-100);
+    font-size: 0.9rem;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li .check-status {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+  .check-ok { background: var(--success-bg); color: var(--success); }
+  .check-no { background: var(--danger-bg); color: var(--danger); }
+  .check-wait { background: var(--warning-bg); color: var(--warning); }
+
+  /* ===== TIMELINE ===== */
+  .timeline { padding-left: 1.5rem; border-left: 2px solid var(--gray-200); }
+  .timeline-item { position: relative; margin-bottom: 1rem; padding-left: 1rem; }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -1.35rem;
+    top: 5px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 2px solid var(--white);
+  }
+  .timeline-item .tl-time { font-size: 0.75rem; color: var(--gray-500); }
+  .timeline-item .tl-text { font-size: 0.85rem; margin-top: 2px; }
+  .timeline-item .tl-user { font-size: 0.75rem; color: var(--gray-600); font-weight: 600; }
+
+  /* ===== VIEWS ===== */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ===== ALERTS ===== */
+  .alert {
+    padding: 0.7rem 1rem;
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    margin-bottom: 0.8rem;
+    border-left: 4px solid;
+  }
+  .alert-success { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+  .alert-warning { background: var(--warning-bg); border-color: var(--warning); color: var(--warning); }
+  .alert-info { background: var(--info-bg); border-color: var(--info); color: var(--info); }
+  .alert-danger { background: var(--danger-bg); border-color: var(--danger); color: var(--danger); }
+
+  /* ===== DETAILS PANEL ===== */
+  .doc-detail-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .doc-detail-header .doc-icon {
+    width: 48px; height: 48px;
+    background: var(--info-bg);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+  .detail-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 0.8rem;
+  }
+  .detail-field label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+  }
+  .detail-field .val {
+    font-size: 0.9rem;
+    color: var(--gray-900);
+    font-weight: 500;
+  }
+
+  /* ===== SECTION TABS ===== */
+  .section-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--gray-200);
+    margin-bottom: 1rem;
+  }
+  .section-tab {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--gray-600);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.15s;
+  }
+  .section-tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    font-weight: 600;
+  }
+  .section-tab:hover { color: var(--primary); }
+
+  /* ===== IMAGE VIEWER ===== */
+  .img-thumb {
+    width: 100%;
+    max-width: 200px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+    cursor: pointer;
+  }
+  .img-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.7rem;
+  }
+  .img-card {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 0.5rem;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--gray-600);
+  }
+  .img-card .img-preview {
+    width: 100%;
+    height: 90px;
+    background: var(--gray-100);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5px;
+    font-size: 2rem;
+    cursor: pointer;
+  }
+
+  /* ===== TOAST ===== */
+  #toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 9999;
+    padding: 0.8rem 1.2rem;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    color: white;
+    font-weight: 600;
+    box-shadow: var(--shadow-md);
+    display: none;
+    max-width: 320px;
+    animation: slideIn 0.3s ease;
+  }
+  .toast-success { background: var(--success); }
+  .toast-warning { background: var(--warning); }
+  .toast-danger { background: var(--danger); }
+  @keyframes slideIn {
+    from { transform: translateX(100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .detail-row { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .hidden { display: none !important; }
+
+  /* campaign types */
+  .campaign-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-right: 3px;
+    margin-bottom: 2px;
+  }
+  .ct-tri { background: #e8f0fb; color: #1565c0; }
+  .ct-wrap { background: #e8f5ed; color: #1e7e4a; }
+  .ct-acc { background: #fff3e0; color: #b85c00; }
+  .ct-other { background: var(--gray-200); color: var(--gray-700); }
+
+  .doc-row-urgent td { background: #fff8f0; }
+  .doc-row-overdue td { background: #fff0f0; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <span class="logo-badge">ISUZU</span>
+      <span class="logo-sub">CHOLBURI ISUZU GROUP CO., LTD.</span>
+    </div>
+    <div class="login-title">ระบบส่งเอกสารและตรวจสอบเอกสาร<br>ที่ปรึกษาการขาย</div>
+    <div id="login-error" class="alert alert-danger hidden">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+    <div class="form-group">
+      <label>ชื่อผู้ใช้ (Username)</label>
+      <input type="text" id="login-user" placeholder="กรอกชื่อผู้ใช้" />
+    </div>
+    <div class="form-group">
+      <label>รหัสผ่าน (Password)</label>
+      <input type="password" id="login-pass" placeholder="กรอกรหัสผ่าน" onkeydown="if(event.key==='Enter')doLogin()" />
+    </div>
+    <button class="btn btn-primary btn-full" onclick="doLogin()">
+      เข้าสู่ระบบ
+    </button>
+    <div style="margin-top:1rem; font-size:0.75rem; color:var(--gray-500); text-align:center; line-height:1.6;">
+      <strong>ทดสอบ:</strong> admin/admin123 | clerk/clerk123 | sales1/sales123
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <span class="brand-icon">ISUZU</span>
+      ระบบส่งเอกสาร - ชลบุรีอีซูซุ
+    </div>
+    <div class="navbar-right">
+      <div class="user-badge">
+        <span id="nav-username">-</span>
+        <span class="role-tag" id="nav-role-tag">-</span>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="doLogout()">ออกจากระบบ</button>
+    </div>
+  </nav>
+
+  <div class="app-body">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div id="sidebar-nav"></div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main-content">
+      <!-- VIEW: DASHBOARD -->
+      <div id="view-dashboard" class="view">
+        <div class="page-header">
+          <div>
+            <h2>ภาพรวมระบบ</h2>
+            <p>สรุปสถานะเอกสารทั้งหมด</p>
+          </div>
+          <button class="btn btn-primary" id="btn-new-doc-dash" onclick="showNewDocModal()" style="display:none">
+            + ส่งเอกสารใหม่
+          </button>
+        </div>
+        <div class="stats-grid" id="stats-grid"></div>
+        <div class="card">
+          <div class="card-header">
+            <h3>เอกสารรอดำเนินการ</h3>
+          </div>
+          <div class="card-body">
+            <div class="table-wrap">
+              <table id="dash-table">
+                <thead>
+                  <tr>
+                    <th>เลขที่</th><th>ที่ปรึกษา</th><th>สาขา</th><th>ประเภท</th><th>วันที่ส่ง</th><th>สถานะ</th><th></th>
+                  </tr>
+                </thead>
+                <tbody id="dash-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: SUBMIT DOCUMENT (Sales) -->
+      <div id="view-submit" class="view">
+        <div class="page-header">
+          <div>
+            <h2>ส่งเอกสาร</h2>
+            <p>ส่งเอกสารเพื่อตรวจสอบและเบิกแคมเพจน์</p>
+          </div>
+        </div>
+        <div id="submit-success-msg" class="alert alert-success hidden">
+          ✅ ส่งเอกสารสำเร็จแล้ว ธุรการจะตรวจสอบโดยเร็ว
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>ข้อมูลการขาย</h3></div>
+          <div class="card-body">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+              <div class="form-group">
+                <label>หมายเลขใบจอง / เลขที่สัญญา *</label>
+                <input type="text" id="s-booking" placeholder="เช่น BK-2024-0001" />
+              </div>
+              <div class="form-group">
+                <label>รุ่นรถ / Vehicle Model *</label>
+                <input type="text" id="s-model" placeholder="เช่น D-MAX 1.9 Ddi" />
+              </div>
+              <div class="form-group">
+                <label>ชื่อลูกค้า *</label>
+                <input type="text" id="s-customer" placeholder="ชื่อ-นามสกุลลูกค้า" />
+              </div>
+              <div class="form-group">
+                <label>ทะเบียนรถ / หมายเลขตัวถัง</label>
+                <input type="text" id="s-plate" placeholder="เช่น กข 1234 ชลบุรี" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>ประเภทเอกสาร / แคมเพจน์ที่เบิก</h3></div>
+          <div class="card-body">
+            <div style="margin-bottom:1rem">
+              <label style="font-size:0.85rem; font-weight:600; color:var(--gray-700); display:block; margin-bottom:0.5rem">เลือกประเภทการเบิก (เลือกได้หลายข้อ)</label>
+              <div id="campaign-checks" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.4rem;">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>ชื่อแคมเพจน์ / รายละเอียดส่วนลด</label>
+              <input type="text" id="s-campaign-name" placeholder="เช่น สุขยกตระกูล, ฟรีค่าดอกเบี้ย 3 เดือน" />
+            </div>
+            <div class="form-group">
+              <label>ยอดเบิก (บาท)</label>
+              <input type="number" id="s-amount" placeholder="0.00" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>เอกสารแนบ</h3></div>
+          <div class="card-body">
+            <div style="margin-bottom:1rem; font-size:0.85rem; color:var(--gray-700);">
+              <strong>เอกสารที่ต้องส่ง:</strong>
+              <ul id="required-docs-list" style="margin-top:0.4rem; padding-left:1.2rem; line-height:1.8;"></ul>
+            </div>
+            <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+              <div class="upload-icon">📎</div>
+              <p><strong>คลิกเพื่อแนบไฟล์</strong><br>รองรับ PDF, JPG, PNG, HEIC (แต่ละไฟล์ไม่เกิน 10MB)</p>
+            </div>
+            <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.png,.heic" style="display:none" onchange="handleFileSelect(event)" />
+            <div id="file-list"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>หมายเหตุเพิ่มเติม</h3></div>
+          <div class="card-body">
+            <div class="form-group">
+              <textarea id="s-remark" placeholder="หมายเหตุ หรือข้อมูลเพิ่มเติมที่ต้องการแจ้งธุรการ"></textarea>
+            </div>
+            <button class="btn btn-primary" style="min-width:150px" onclick="submitDocument()">
+              📤 ส่งเอกสาร
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: MY DOCUMENTS (Sales) -->
+      <div id="view-mydocs" class="view">
+        <div class="page-header">
+          <div>
+            <h2>เอกสารของฉัน</h2>
+            <p>ติดตามสถานะเอกสารที่ส่งแล้ว</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div class="filter-bar">
+              <input type="text" id="my-search" placeholder="🔍 ค้นหา..." oninput="renderMyDocs()" />
+              <select id="my-status-filter" onchange="renderMyDocs()">
+                <option value="">ทุกสถานะ</option>
+                <option value="pending">รอตรวจสอบ</option>
+                <option value="checking">กำลังตรวจสอบ</option>
+                <option value="approved">อนุมัติแล้ว</option>
+                <option value="rejected">ส่งคืนแก้ไข</option>
+              </select>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>เลขที่</th><th>ลูกค้า</th><th>รุ่นรถ</th><th>ประเภท</th><th>ยอดเบิก</th><th>วันที่ส่ง</th><th>สถานะ</th><th></th>
+                  </tr>
+                </thead>
+                <tbody id="my-docs-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: VERIFY DOCUMENTS (Clerk) -->
+      <div id="view-verify" class="view">
+        <div class="page-header">
+          <div>
+            <h2>ตรวจสอบเอกสาร</h2>
+            <p>รายการเอกสารที่รอการตรวจสอบ</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div class="filter-bar">
+              <input type="text" id="v-search" placeholder="🔍 ค้นหาชื่อ/เลขที่..." oninput="renderVerifyDocs()" />
+              <select id="v-status" onchange="renderVerifyDocs()">
+                <option value="">ทุกสถานะ</option>
+                <option value="pending">รอตรวจสอบ</option>
+                <option value="checking">กำลังตรวจสอบ</option>
+                <option value="approved">อนุมัติแล้ว</option>
+                <option value="rejected">ส่งคืน</option>
+              </select>
+              <select id="v-branch" onchange="renderVerifyDocs()">
+                <option value="">ทุกสาขา</option>
+              </select>
+              <select id="v-type" onchange="renderVerifyDocs()">
+                <option value="">ทุกประเภท</option>
+              </select>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>เลขที่</th><th>ที่ปรึกษา</th><th>สาขา</th><th>ลูกค้า</th><th>รุ่นรถ</th><th>ประเภท</th><th>ยอดเบิก</th><th>วันที่ส่ง</th><th>สถานะ</th><th>จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="verify-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: DOCUMENT DETAIL -->
+      <div id="view-doc-detail" class="view">
+        <div class="page-header">
+          <div>
+            <h2>รายละเอียดเอกสาร</h2>
+          </div>
+          <button class="btn btn-outline" onclick="goBack()">← ย้อนกลับ</button>
+        </div>
+        <div id="doc-detail-content"></div>
+      </div>
+
+      <!-- VIEW: ALL DOCS (Admin/Clerk) -->
+      <div id="view-alldocs" class="view">
+        <div class="page-header">
+          <div>
+            <h2>เอกสารทั้งหมด</h2>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div class="filter-bar">
+              <input type="text" id="all-search" placeholder="🔍 ค้นหา..." oninput="renderAllDocs()" />
+              <select id="all-status" onchange="renderAllDocs()">
+                <option value="">ทุกสถานะ</option>
+                <option value="pending">รอตรวจสอบ</option>
+                <option value="checking">กำลังตรวจสอบ</option>
+                <option value="approved">อนุมัติแล้ว</option>
+                <option value="rejected">ส่งคืน</option>
+              </select>
+              <select id="all-branch" onchange="renderAllDocs()">
+                <option value="">ทุกสาขา</option>
+              </select>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>เลขที่</th><th>ที่ปรึกษา</th><th>สาขา</th><th>ลูกค้า</th><th>ประเภท</th><th>ยอดเบิก</th><th>วันที่ส่ง</th><th>สถานะ</th><th></th>
+                  </tr>
+                </thead>
+                <tbody id="all-docs-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: USER MANAGEMENT (Admin) -->
+      <div id="view-users" class="view">
+        <div class="page-header">
+          <div>
+            <h2>จัดการผู้ใช้งาน</h2>
+            <p>เพิ่ม / แก้ไข / ปิดการใช้งาน</p>
+          </div>
+          <button class="btn btn-primary" onclick="showAddUserModal()">+ เพิ่มผู้ใช้ใหม่</button>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div class="filter-bar">
+              <input type="text" id="usr-search" placeholder="🔍 ค้นหาชื่อ..." oninput="renderUsers()" />
+              <select id="usr-role" onchange="renderUsers()">
+                <option value="">ทุกสิทธิ์</option>
+                <option value="admin">Admin</option>
+                <option value="clerk">ธุรการ</option>
+                <option value="sales">ที่ปรึกษาการขาย</option>
+              </select>
+              <select id="usr-active" onchange="renderUsers()">
+                <option value="">ทุกสถานะ</option>
+                <option value="active">ใช้งานอยู่</option>
+                <option value="inactive">ปิดการใช้งาน</option>
+              </select>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ชื่อ-นามสกุล</th><th>Username</th><th>สิทธิ์</th><th>สาขา</th><th>เบอร์โทร</th><th>วันเริ่มงาน</th><th>สถานะ</th><th>จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="users-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: REPORTS -->
+      <div id="view-reports" class="view">
+        <div class="page-header">
+          <div>
+            <h2>รายงานสรุป</h2>
+          </div>
+        </div>
+        <div class="stats-grid" id="report-stats"></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+          <div class="card">
+            <div class="card-header"><h3>สถิติตามสาขา</h3></div>
+            <div class="card-body" id="report-by-branch"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>สถิติตามประเภทเอกสาร</h3></div>
+            <div class="card-body" id="report-by-type"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<!-- Modal: Verify Document -->
+<div class="modal-overlay" id="modal-verify">
+  <div class="modal" style="max-width:600px">
+    <h3>✅ ตรวจสอบและอนุมัติเอกสาร</h3>
+    <div id="modal-verify-content"></div>
+    <div style="margin-top:1rem">
+      <div class="form-group">
+        <label>หมายเหตุ / เหตุผล (กรณีส่งคืน)</label>
+        <textarea id="verify-remark" placeholder="ระบุเหตุผลหรือรายการที่ต้องแก้ไข..."></textarea>
+      </div>
+      <div style="display:flex; gap:0.8rem; margin-top:0.5rem">
+        <button class="btn btn-success" onclick="approveDoc()">✅ อนุมัติ</button>
+        <button class="btn btn-warning" onclick="requestEdit()">✏️ ส่งคืนแก้ไข</button>
+        <button class="btn btn-outline" onclick="closeModal('modal-verify')">ยกเลิก</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add/Edit User -->
+<div class="modal-overlay" id="modal-user">
+  <div class="modal">
+    <h3 id="modal-user-title">เพิ่มผู้ใช้ใหม่</h3>
+    <input type="hidden" id="u-id" />
+    <div class="form-group">
+      <label>ชื่อ-นามสกุล *</label>
+      <input type="text" id="u-name" placeholder="ชื่อเต็ม" />
+    </div>
+    <div class="form-group">
+      <label>Username *</label>
+      <input type="text" id="u-username" placeholder="ตัวอักษรไม่เกิน 20 ตัว" />
+    </div>
+    <div class="form-group">
+      <label>Password *</label>
+      <input type="password" id="u-pass" placeholder="อย่างน้อย 6 ตัวอักษร" />
+    </div>
+    <div class="form-group">
+      <label>สิทธิ์การใช้งาน *</label>
+      <select id="u-role">
+        <option value="sales">ที่ปรึกษาการขาย</option>
+        <option value="clerk">ธุรการ</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>สาขา *</label>
+      <select id="u-branch"></select>
+    </div>
+    <div class="form-group">
+      <label>เบอร์โทรศัพท์</label>
+      <input type="text" id="u-phone" placeholder="0xx-xxxxxxx" />
+    </div>
+    <div class="form-group">
+      <label>วันที่เริ่มงาน</label>
+      <input type="date" id="u-startdate" />
+    </div>
+    <div style="display:flex; gap:0.8rem; margin-top:0.5rem">
+      <button class="btn btn-primary" onclick="saveUser()">บันทึก</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-user')">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Image Viewer -->
+<div class="modal-overlay" id="modal-image" onclick="closeModal('modal-image')">
+  <div class="modal" style="max-width:800px; background:transparent; box-shadow:none; padding:0">
+    <img id="modal-image-src" src="" style="max-width:100%; max-height:85vh; border-radius:8px; display:block; margin:auto;" />
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// =========================================
+// DATA STORE
+// =========================================
+const APP = {
+  currentUser: null,
+  prevView: null,
+  editingDocId: null,
+  editingUserId: null,
+};
+
+const BRANCHES = [
+  'สาขาระยอง','สาขานิคมพัฒนา','สาขามาบตาพุด','สาขาโรงงานระยอง',
+  'สาขาบ้านค่าย','สาขาปลวกแดง','สาขาซีเค','สาขาโรงงานปลวกแดง'
+];
+
+const CAMPAIGN_TYPES = [
+  { id:'tri', label:'แคมเพจน์ตรีเพชร (Tri-Petch)', tag:'ct-tri' },
+  { id:'wrap', label:'แต่งรถ/Wrap', tag:'ct-wrap' },
+  { id:'acc', label:'อุปกรณ์ตกแต่ง (Accessories)', tag:'ct-acc' },
+  { id:'finance', label:'แคมเพจน์ดอกเบี้ย/จัดไฟแนนซ์', tag:'ct-tri' },
+  { id:'trade', label:'ส่งมอบรถ/Trade-in', tag:'ct-wrap' },
+  { id:'other', label:'อื่นๆ', tag:'ct-other' },
+];
+
+const REQUIRED_DOCS_MAP = {
+  tri: ['ใบจองที่ได้รับอนุมัติ','สำเนาบัตรประชาชนลูกค้า','ใบส่งมอบรถ','ใบแจ้งยอดค่าใช้จ่าย','สัญญาซื้อขาย (ถ้ามี)'],
+  wrap: ['ใบจองที่ได้รับอนุมัติ','รูปถ่ายหน้าร้านที่แต่ง','ใบเสร็จจากอู่','ใบส่งมอบรถหลังแต่ง'],
+  acc: ['ใบจองที่ได้รับอนุมัติ','รายการ Accessories ที่ซื้อ','ใบเสร็จอุปกรณ์'],
+  finance: ['ใบจองที่ได้รับอนุมัติ','หนังสืออนุมัติสินเชื่อ','สำเนาสัญญาเช่าซื้อ'],
+  trade: ['ใบจองที่ได้รับอนุมัติ','หนังสือโอนกรรมสิทธิ์','รูปถ่ายรถ Trade-in'],
+  other: ['เอกสารที่เกี่ยวข้อง (ตามที่ระบุ)'],
+};
+
+// DEFAULT USERS
+let USERS = [
+  { id:'u1', username:'admin', password:'admin123', name:'นายชนะ สุขมาก', role:'admin', branch:'สาขาระยอง', phone:'038-000001', startDate:'2010-01-01', active:true },
+  { id:'u2', username:'clerk', password:'clerk123', name:'นางสาวพิมพ์ใจ รักดี', role:'clerk', branch:'สาขาระยอง', phone:'038-000002', startDate:'2018-03-15', active:true },
+  { id:'u3', username:'sales1', password:'sales123', name:'นายสมชาย ใจดี', role:'sales', branch:'สาขาระยอง', phone:'089-111111', startDate:'2020-06-01', active:true },
+  { id:'u4', username:'sales2', password:'sales456', name:'นางสาวจิราพร มีสุข', role:'sales', branch:'สาขาปลวกแดง', phone:'089-222222', startDate:'2021-09-15', active:true },
+  { id:'u5', username:'sales3', password:'sales789', name:'นายอนุชา ชนะชัย', role:'sales', branch:'สาขานิคมพัฒนา', phone:'089-333333', startDate:'2022-01-10', active:false },
+];
+
+// SAMPLE DOCUMENTS
+let DOCUMENTS = [
+  {
+    id:'DOC-2024-001', bookingNo:'BK-2024-001', model:'D-MAX 1.9 Ddi Hi-Lander', customer:'นายสมบัติ เพชรดี', plate:'กข 1234 ชลบุรี',
+    campaigns:['tri'], campaignName:'สุขยกตระกูล', amount:15000, remark:'ลูกค้าขอส่วนลดพิเศษ',
+    files:[{name:'booking.pdf', type:'pdf', size:'1.2MB'},{name:'id_card.jpg', type:'jpg', size:'0.5MB'}],
+    salesId:'u3', salesName:'นายสมชาย ใจดี', branch:'สาขาระยอง',
+    submitDate:'2024-12-10', status:'approved', clerkId:'u2', clerkName:'นางสาวพิมพ์ใจ รักดี',
+    approveDate:'2024-12-11', remarks:[],
+    history:[
+      {date:'2024-12-10 09:30', user:'นายสมชาย ใจดี', action:'ส่งเอกสาร'},
+      {date:'2024-12-10 14:00', user:'นางสาวพิมพ์ใจ รักดี', action:'รับเรื่อง กำลังตรวจสอบ'},
+      {date:'2024-12-11 10:15', user:'นางสาวพิมพ์ใจ รักดี', action:'อนุมัติเอกสาร'},
+    ]
+  },
+  {
+    id:'DOC-2024-002', bookingNo:'BK-2024-002', model:'MU-X 1.9 DDi', customer:'นางมาลี สุขใจ', plate:'',
+    campaigns:['wrap','acc'], campaignName:'โปร Accessories ฟรี', amount:25000, remark:'',
+    files:[{name:'booking_002.pdf', type:'pdf', size:'0.9MB'}],
+    salesId:'u4', salesName:'นางสาวจิราพร มีสุข', branch:'สาขาปลวกแดง',
+    submitDate:'2024-12-12', status:'checking', clerkId:'u2', clerkName:'นางสาวพิมพ์ใจ รักดี',
+    approveDate:null, remarks:[],
+    history:[
+      {date:'2024-12-12 08:45', user:'นางสาวจิราพร มีสุข', action:'ส่งเอกสาร'},
+      {date:'2024-12-12 13:00', user:'นางสาวพิมพ์ใจ รักดี', action:'รับเรื่อง กำลังตรวจสอบ'},
+    ]
+  },
+  {
+    id:'DOC-2024-003', bookingNo:'BK-2024-003', model:'D-MAX 3.0 Ddi 4x4', customer:'นายวิชัย กล้าหาญ', plate:'',
+    campaigns:['tri'], campaignName:'ฟรีค่าดอกเบี้ย 3 เดือน', amount:8500, remark:'',
+    files:[],
+    salesId:'u3', salesName:'นายสมชาย ใจดี', branch:'สาขาระยอง',
+    submitDate:'2024-12-13', status:'pending', clerkId:null, clerkName:null,
+    approveDate:null, remarks:[],
+    history:[
+      {date:'2024-12-13 10:00', user:'นายสมชาย ใจดี', action:'ส่งเอกสาร'},
+    ]
+  },
+  {
+    id:'DOC-2024-004', bookingNo:'BK-2024-004', model:'Trooper 2.8 DDi', customer:'นางสาวกนกพร ดีใจ', plate:'ขจ 5678 ระยอง',
+    campaigns:['trade'], campaignName:'Trade-in เพิ่มราคา', amount:30000, remark:'Trade-in รถเก่า',
+    files:[{name:'trade_docs.pdf', type:'pdf', size:'2.1MB'}],
+    salesId:'u4', salesName:'นางสาวจิราพร มีสุข', branch:'สาขาปลวกแดง',
+    submitDate:'2024-12-11', status:'rejected', clerkId:'u2', clerkName:'นางสาวพิมพ์ใจ รักดี',
+    approveDate:null, remarks:['เอกสารไม่ครบ - ต้องการใบโอนกรรมสิทธิ์ตัวจริง'],
+    history:[
+      {date:'2024-12-11 11:00', user:'นางสาวจิราพร มีสุข', action:'ส่งเอกสาร'},
+      {date:'2024-12-12 09:00', user:'นางสาวพิมพ์ใจ รักดี', action:'ส่งคืนแก้ไข - เอกสารไม่ครบ'},
+    ]
+  },
+];
+
+// =========================================
+// AUTH
+// =========================================
+function doLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  const user = USERS.find(x => x.username === u && x.password === p && x.active);
+  if (!user) {
+    document.getElementById('login-error').classList.remove('hidden');
+    return;
+  }
+  APP.currentUser = user;
+  document.getElementById('login-error').classList.add('hidden');
+  initApp();
+}
+
+function doLogout() {
+  APP.currentUser = null;
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+}
+
+// =========================================
+// INIT APP
+// =========================================
+function initApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').classList.add('active');
+
+  const u = APP.currentUser;
+  document.getElementById('nav-username').textContent = u.name;
+  const rt = document.getElementById('nav-role-tag');
+  rt.textContent = u.role === 'admin' ? 'Admin' : u.role === 'clerk' ? 'ธุรการ' : 'ที่ปรึกษา';
+  rt.className = 'role-tag ' + (u.role === 'admin' ? 'role-admin' : u.role === 'clerk' ? 'role-clerk' : 'role-sales');
+
+  buildSidebar();
+  populateBranchFilters();
+  populateCampaignChecks();
+  populateTypeFilter();
+  populateRequiredDocs();
+
+  if (u.role === 'sales') showView('view-dashboard');
+  else showView('view-verify');
+}
+
+function buildSidebar() {
+  const role = APP.currentUser.role;
+  let html = '';
+
+  if (role === 'admin' || role === 'clerk') {
+    html += `<div class="nav-section-title">ภาพรวม</div>`;
+    html += navItem('view-dashboard', icon_home, 'แดชบอร์ด');
+  }
+
+  if (role === 'sales') {
+    html += `<div class="nav-section-title">เอกสารของฉัน</div>`;
+    html += navItem('view-submit', icon_upload, 'ส่งเอกสาร');
+    html += navItem('view-mydocs', icon_list, 'ติดตามเอกสาร');
+    html += `<div class="nav-section-title">ข้อมูล</div>`;
+    html += navItem('view-dashboard', icon_chart, 'สรุปของฉัน');
+  }
+
+  if (role === 'clerk' || role === 'admin') {
+    html += `<div class="nav-section-title">จัดการเอกสาร</div>`;
+    html += navItem('view-verify', icon_check, 'ตรวจสอบเอกสาร');
+    html += navItem('view-alldocs', icon_folder, 'เอกสารทั้งหมด');
+    html += `<div class="nav-section-title">ข้อมูล</div>`;
+    html += navItem('view-reports', icon_chart, 'รายงาน');
+  }
+
+  if (role === 'admin') {
+    html += `<div class="nav-section-title">ระบบ</div>`;
+    html += navItem('view-users', icon_user, 'จัดการผู้ใช้');
+  }
+
+  document.getElementById('sidebar-nav').innerHTML = html;
+}
+
+function navItem(view, iconSvg, label) {
+  return `<div class="nav-item" onclick="showView('${view}')" data-view="${view}">${iconSvg}<span>${label}</span></div>`;
+}
+
+// SVG Icons
+const icon_home = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
+const icon_upload = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
+const icon_list = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`;
+const icon_check = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>`;
+const icon_folder = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>`;
+const icon_user = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>`;
+const icon_chart = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`;
+
+// =========================================
+// VIEW MANAGEMENT
+// =========================================
+function showView(viewId) {
+  APP.prevView = document.querySelector('.view.active')?.id || null;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.dataset.view === viewId);
+  });
+  document.getElementById(viewId).classList.add('active');
+
+  const renders = {
+    'view-dashboard': renderDashboard,
+    'view-mydocs': renderMyDocs,
+    'view-verify': renderVerifyDocs,
+    'view-alldocs': renderAllDocs,
+    'view-users': renderUsers,
+    'view-reports': renderReports,
+  };
+  if (renders[viewId]) renders[viewId]();
+}
+
+function goBack() {
+  if (APP.prevView) showView(APP.prevView);
+  else showView('view-dashboard');
+}
+
+// =========================================
+// DASHBOARD
+// =========================================
+function renderDashboard() {
+  const role = APP.currentUser.role;
+  let docs = DOCUMENTS;
+  if (role === 'sales') docs = docs.filter(d => d.salesId === APP.currentUser.id);
+
+  const total = docs.length;
+  const pending = docs.filter(d => d.status === 'pending').length;
+  const checking = docs.filter(d => d.status === 'checking').length;
+  const approved = docs.filter(d => d.status === 'approved').length;
+  const rejected = docs.filter(d => d.status === 'rejected').length;
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card stat-blue"><div class="stat-label">เอกสารทั้งหมด</div><div class="stat-value">${total}</div><div class="stat-sub">รายการ</div></div>
+    <div class="stat-card stat-amber"><div class="stat-label">รอตรวจสอบ</div><div class="stat-value">${pending}</div><div class="stat-sub">รายการ</div></div>
+    <div class="stat-card stat-amber"><div class="stat-label">กำลังตรวจสอบ</div><div class="stat-value">${checking}</div><div class="stat-sub">รายการ</div></div>
+    <div class="stat-card stat-green"><div class="stat-label">อนุมัติแล้ว</div><div class="stat-value">${approved}</div><div class="stat-sub">รายการ</div></div>
+    <div class="stat-card stat-red"><div class="stat-label">ส่งคืนแก้ไข</div><div class="stat-value">${rejected}</div><div class="stat-sub">รายการ</div></div>
+  `;
+
+  const btnDash = document.getElementById('btn-new-doc-dash');
+  if (btnDash) btnDash.style.display = role === 'sales' ? 'inline-flex' : 'none';
+
+  const pending_docs = docs.filter(d => ['pending','checking','rejected'].includes(d.status));
+  document.getElementById('dash-tbody').innerHTML = pending_docs.length === 0
+    ? `<tr><td colspan="7" style="text-align:center; color:var(--gray-500); padding:2rem">ไม่มีเอกสารรอดำเนินการ</td></tr>`
+    : pending_docs.map(d => `
+      <tr class="${d.status === 'rejected' ? 'doc-row-overdue' : ''}">
+        <td><strong>${d.id}</strong></td>
+        <td>${d.salesName}</td>
+        <td>${d.branch}</td>
+        <td>${d.campaigns.map(c => `<span class="campaign-tag ${getCampaignTag(c)}">${getCampaignLabel(c)}</span>`).join('')}</td>
+        <td>${d.submitDate}</td>
+        <td>${statusBadge(d.status)}</td>
+        <td><button class="btn btn-sm btn-outline" onclick="showDocDetail('${d.id}')">ดูรายละเอียด</button></td>
+      </tr>
+    `).join('');
+}
+
+// =========================================
+// MY DOCS (Sales)
+// =========================================
+function renderMyDocs() {
+  const search = (document.getElementById('my-search')?.value || '').toLowerCase();
+  const statusFilter = document.getElementById('my-status-filter')?.value || '';
+  const myDocs = DOCUMENTS.filter(d => d.salesId === APP.currentUser.id)
+    .filter(d => !statusFilter || d.status === statusFilter)
+    .filter(d => !search || d.id.toLowerCase().includes(search) || d.customer.toLowerCase().includes(search) || d.model.toLowerCase().includes(search));
+
+  document.getElementById('my-docs-tbody').innerHTML = myDocs.length === 0
+    ? `<tr><td colspan="8" style="text-align:center; color:var(--gray-500); padding:2rem">ไม่พบเอกสาร</td></tr>`
+    : myDocs.map(d => `
+      <tr>
+        <td><strong>${d.id}</strong></td>
+        <td>${d.customer}</td>
+        <td>${d.model}</td>
+        <td>${d.campaigns.map(c => `<span class="campaign-tag ${getCampaignTag(c)}">${getCampaignLabel(c)}</span>`).join('')}</td>
+        <td style="text-align:right">${d.amount > 0 ? d.amount.toLocaleString() + ' ฿' : '-'}</td>
+        <td>${d.submitDate}</td>
+        <td>${statusBadge(d.status)}</td>
+        <td>
+          <button class="btn btn-sm btn-outline" onclick="showDocDetail('${d.id}')">รายละเอียด</button>
+          ${d.status === 'rejected' ? `<button class="btn btn-sm btn-warning" onclick="resubmit('${d.id}')" style="margin-left:4px">แก้ไขใหม่</button>` : ''}
+        </td>
+      </tr>
+    `).join('');
+}
+
+// =========================================
+// VERIFY DOCS (Clerk)
+// =========================================
+function renderVerifyDocs() {
+  const search = (document.getElementById('v-search')?.value || '').toLowerCase();
+  const sf = document.getElementById('v-status')?.value || '';
+  const bf = document.getElementById('v-branch')?.value || '';
+  const tf = document.getElementById('v-type')?.value || '';
+
+  let docs = DOCUMENTS
+    .filter(d => !sf || d.status === sf)
+    .filter(d => !bf || d.branch === bf)
+    .filter(d => !tf || d.campaigns.includes(tf))
+    .filter(d => !search || d.id.toLowerCase().includes(search) || d.customer.toLowerCase().includes(search) || d.salesName.toLowerCase().includes(search));
+
+  document.getElementById('verify-tbody').innerHTML = docs.length === 0
+    ? `<tr><td colspan="10" style="text-align:center; color:var(--gray-500); padding:2rem">ไม่พบเอกสาร</td></tr>`
+    : docs.map(d => `
+      <tr>
+        <td><strong>${d.id}</strong></td>
+        <td>${d.salesName}</td>
+        <td>${d.branch}</td>
+        <td>${d.customer}</td>
+        <td style="font-size:0.8rem">${d.model}</td>
+        <td>${d.campaigns.map(c => `<span class="campaign-tag ${getCampaignTag(c)}">${getCampaignLabel(c)}</span>`).join('')}</td>
+        <td style="text-align:right">${d.amount > 0 ? d.amount.toLocaleString() + ' ฿' : '-'}</td>
+        <td>${d.submitDate}</td>
+        <td>${statusBadge(d.status)}</td>
+        <td>
+          <button class="btn btn-sm btn-outline" onclick="showDocDetail('${d.id}')">ดู</button>
+          ${d.status !== 'approved' ? `<button class="btn btn-sm btn-success" onclick="openVerifyModal('${d.id}')" style="margin-left:4px">ตรวจ</button>` : ''}
+        </td>
+      </tr>
+    `).join('');
+}
+
+// =========================================
+// ALL DOCS
+// =========================================
+function renderAllDocs() {
+  const search = (document.getElementById('all-search')?.value || '').toLowerCase();
+  const sf = document.getElementById('all-status')?.value || '';
+  const bf = document.getElementById('all-branch')?.value || '';
+
+  let docs = DOCUMENTS
+    .filter(d => !sf || d.status === sf)
+    .filter(d => !bf || d.branch === bf)
+    .filter(d => !search || d.id.toLowerCase().includes(search) || d.customer.toLowerCase().includes(search) || d.salesName.toLowerCase().includes(search));
+
+  document.getElementById('all-docs-tbody').innerHTML = docs.length === 0
+    ? `<tr><td colspan="9" style="text-align:center; color:var(--gray-500); padding:2rem">ไม่พบเอกสาร</td></tr>`
+    : docs.map(d => `
+      <tr>
+        <td><strong>${d.id}</strong></td>
+        <td>${d.salesName}</td>
+        <td>${d.branch}</td>
+        <td>${d.customer}</td>
+        <td>${d.campaigns.map(c => `<span class="campaign-tag ${getCampaignTag(c)}">${getCampaignLabel(c)}</span>`).join('')}</td>
+        <td style="text-align:right">${d.amount > 0 ? d.amount.toLocaleString() + ' ฿' : '-'}</td>
+        <td>${d.submitDate}</td>
+        <td>${statusBadge(d.status)}</td>
+        <td><button class="btn btn-sm btn-outline" onclick="showDocDetail('${d.id}')">ดู</button></td>
+      </tr>
+    `).join('');
+}
+
+// =========================================
+// DOC DETAIL
+// =========================================
+function showDocDetail(docId) {
+  const doc = DOCUMENTS.find(d => d.id === docId);
+  if (!doc) return;
+  APP.editingDocId = docId;
+  APP.prevView = document.querySelector('.view.active')?.id || 'view-dashboard';
+
+  const isClerkOrAdmin = ['clerk','admin'].includes(APP.currentUser.role);
+  const campaignLabels = doc.campaigns.map(c => getCampaignLabel(c)).join(', ');
+
+  let html = `
+    <div class="doc-detail-header">
+      <div class="doc-icon">📄</div>
+      <div>
+        <h3 style="font-family:'Kanit',sans-serif; color:var(--primary); margin-bottom:4px">${doc.id}</h3>
+        <p style="font-size:0.85rem; color:var(--gray-600)">ส่งเมื่อ ${doc.submitDate} โดย ${doc.salesName}</p>
+        <div style="margin-top:6px">${statusBadge(doc.status)}</div>
+      </div>
+    </div>
+
+    <div class="detail-row">
+      <div class="detail-field"><label>เลขที่ใบจอง</label><div class="val">${doc.bookingNo}</div></div>
+      <div class="detail-field"><label>รุ่นรถ</label><div class="val">${doc.model}</div></div>
+      <div class="detail-field"><label>ชื่อลูกค้า</label><div class="val">${doc.customer}</div></div>
+      <div class="detail-field"><label>ทะเบียน/ตัวถัง</label><div class="val">${doc.plate || '-'}</div></div>
+      <div class="detail-field"><label>ที่ปรึกษาการขาย</label><div class="val">${doc.salesName}</div></div>
+      <div class="detail-field"><label>สาขา</label><div class="val">${doc.branch}</div></div>
+      <div class="detail-field"><label>ประเภทแคมเพจน์</label><div class="val">${campaignLabels}</div></div>
+      <div class="detail-field"><label>ชื่อแคมเพจน์</label><div class="val">${doc.campaignName || '-'}</div></div>
+      <div class="detail-field"><label>ยอดเบิก (บาท)</label><div class="val" style="color:var(--success); font-weight:700; font-size:1.1rem">${doc.amount > 0 ? doc.amount.toLocaleString() + ' ฿' : '-'}</div></div>
+    </div>
+  `;
+
+  if (doc.remark) {
+    html += `<div class="alert alert-info"><strong>หมายเหตุ:</strong> ${doc.remark}</div>`;
+  }
+
+  if (doc.remarks && doc.remarks.length > 0) {
+    html += `<div class="alert alert-warning"><strong>⚠️ ข้อความจากธุรการ:</strong><br>${doc.remarks.join('<br>')}</div>`;
+  }
+
+  html += `<div class="section-tabs" id="detail-tabs">
+    <div class="section-tab active" onclick="switchDetailTab('files','detail-tabs')">📎 ไฟล์แนบ</div>
+    <div class="section-tab" onclick="switchDetailTab('checklist','detail-tabs')">✅ Checklist</div>
+    <div class="section-tab" onclick="switchDetailTab('history','detail-tabs')">📋 ประวัติ</div>
+  </div>`;
+
+  // Files tab
+  html += `<div id="detail-tab-files">`;
+  if (doc.files.length === 0) {
+    html += `<p style="color:var(--gray-500); font-size:0.85rem; text-align:center; padding:1.5rem">ยังไม่มีไฟล์แนบ</p>`;
+  } else {
+    html += `<div class="img-grid">`;
+    doc.files.forEach(f => {
+      const isImg = ['jpg','jpeg','png','heic'].includes(f.type.toLowerCase());
+      html += `<div class="img-card">
+        <div class="img-preview" onclick="${isImg ? 'showImg' : 'showToast'}('${f.name}','info')">
+          ${isImg ? '🖼️' : '📄'}
+        </div>
+        <div>${f.name}</div>
+        <div style="color:var(--gray-400)">${f.size}</div>
+        <a href="#" onclick="showToast('ดาวน์โหลด ${f.name}','success'); return false;" style="font-size:0.72rem; color:var(--primary)">⬇ ดาวน์โหลด</a>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  html += `</div>`;
+
+  // Checklist tab
+  const requiredDocs = getRequiredDocs(doc.campaigns);
+  html += `<div id="detail-tab-checklist" style="display:none">
+    <p style="font-size:0.82rem; color:var(--gray-600); margin-bottom:0.7rem">เอกสารที่ต้องส่งสำหรับแคมเพจน์นี้</p>
+    <ul class="checklist">
+  `;
+  requiredDocs.forEach((item, i) => {
+    const hasFile = doc.files.length > i;
+    const statusClass = hasFile ? 'check-ok' : 'check-no';
+    const statusIcon = hasFile ? '✓' : '✗';
+    html += `<li>
+      <div class="check-status ${statusClass}">${statusIcon}</div>
+      <span>${item}</span>
+      ${isClerkOrAdmin && !hasFile ? `<span style="font-size:0.75rem; color:var(--danger)">⚠️ ยังไม่มีไฟล์</span>` : ''}
+    </li>`;
+  });
+  html += `</ul></div>`;
+
+  // History tab
+  html += `<div id="detail-tab-history" style="display:none"><div class="timeline">`;
+  doc.history.forEach(h => {
+    html += `<div class="timeline-item">
+      <div class="tl-time">${h.date}</div>
+      <div class="tl-text">${h.action}</div>
+      <div class="tl-user">${h.user}</div>
+    </div>`;
+  });
+  html += `</div></div>`;
+
+  // Actions
+  if (isClerkOrAdmin && doc.status !== 'approved') {
+    html += `<div style="margin-top:1.5rem; display:flex; gap:0.7rem; flex-wrap:wrap">
+      <button class="btn btn-success" onclick="openVerifyModal('${doc.id}')">✅ ตรวจสอบ / อนุมัติ</button>
+      <button class="btn btn-warning" onclick="openVerifyModal('${doc.id}')">✏️ ส่งคืนแก้ไข</button>
+    </div>`;
+  }
+
+  document.getElementById('doc-detail-content').innerHTML = html;
+  showView('view-doc-detail');
+}
+
+function switchDetailTab(tabName, tabsId) {
+  const tabs = document.querySelectorAll(`#${tabsId} .section-tab`);
+  tabs.forEach((t, i) => {
+    const names = ['files','checklist','history'];
+    const el = document.getElementById('detail-tab-' + names[i]);
+    if (el) el.style.display = 'none';
+    t.classList.remove('active');
+  });
+  document.getElementById('detail-tab-' + tabName).style.display = 'block';
+  const idx = ['files','checklist','history'].indexOf(tabName);
+  if (idx >= 0) tabs[idx].classList.add('active');
+}
+
+// =========================================
+// SUBMIT DOCUMENT
+// =========================================
+let selectedFiles = [];
+
+function populateCampaignChecks() {
+  document.getElementById('campaign-checks').innerHTML = CAMPAIGN_TYPES.map(c =>
+    `<label style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 8px; border-radius:6px; border:1px solid var(--gray-200); font-size:0.85rem; transition:all 0.15s; hover:bg-gray-100">
+      <input type="checkbox" value="${c.id}" onchange="updateRequiredDocs()" style="width:16px; height:16px; cursor:pointer"/>
+      ${c.label}
+    </label>`
+  ).join('');
+}
+
+function populateRequiredDocs() {
+  const selected = getSelectedCampaigns();
+  const docs = getRequiredDocs(selected.length > 0 ? selected : ['tri']);
+  document.getElementById('required-docs-list').innerHTML = docs.map(d => `<li>${d}</li>`).join('');
+}
+
+function updateRequiredDocs() {
+  const selected = getSelectedCampaigns();
+  const docs = getRequiredDocs(selected.length > 0 ? selected : ['tri']);
+  document.getElementById('required-docs-list').innerHTML = docs.map(d => `<li>${d}</li>`).join('');
+}
+
+function getSelectedCampaigns() {
+  return Array.from(document.querySelectorAll('#campaign-checks input:checked')).map(i => i.value);
+}
+
+function getRequiredDocs(campaigns) {
+  const all = new Set();
+  campaigns.forEach(c => {
+    (REQUIRED_DOCS_MAP[c] || []).forEach(d => all.add(d));
+  });
+  return Array.from(all);
+}
+
+function handleFileSelect(event) {
+  const files = Array.from(event.target.files);
+  files.forEach(f => {
+    selectedFiles.push({ name: f.name, type: f.name.split('.').pop(), size: formatFileSize(f.size), file: f });
+  });
+  renderFileList();
+}
+
+function renderFileList() {
+  document.getElementById('file-list').innerHTML = selectedFiles.map((f, i) =>
+    `<div class="file-item">
+      <span class="file-icon">${['pdf'].includes(f.type.toLowerCase()) ? '📄' : '🖼️'}</span>
+      <span class="file-name">${f.name} <span style="color:var(--gray-500); font-size:0.75rem">${f.size}</span></span>
+      <span class="file-remove" onclick="removeFile(${i})">✕</span>
+    </div>`
+  ).join('');
+}
+
+function removeFile(idx) {
+  selectedFiles.splice(idx, 1);
+  renderFileList();
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + 'B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + 'KB';
+  return (bytes/1024/1024).toFixed(1) + 'MB';
+}
+
+function submitDocument() {
+  const booking = document.getElementById('s-booking').value.trim();
+  const model = document.getElementById('s-model').value.trim();
+  const customer = document.getElementById('s-customer').value.trim();
+  if (!booking || !model || !customer) {
+    showToast('กรุณากรอกข้อมูลที่จำเป็น (เลขที่ใบจอง, รุ่นรถ, ชื่อลูกค้า)', 'warning');
+    return;
+  }
+
+  const campaigns = getSelectedCampaigns();
+  if (campaigns.length === 0) {
+    showToast('กรุณาเลือกประเภทการเบิกอย่างน้อย 1 ข้อ', 'warning');
+    return;
+  }
+
+  const u = APP.currentUser;
+  const newId = 'DOC-' + new Date().getFullYear() + '-' + String(DOCUMENTS.length + 1).padStart(3, '0');
+  const today = new Date().toISOString().split('T')[0];
+
+  const newDoc = {
+    id: newId,
+    bookingNo: booking,
+    model: model,
+    customer: customer,
+    plate: document.getElementById('s-plate').value.trim(),
+    campaigns: campaigns,
+    campaignName: document.getElementById('s-campaign-name').value.trim(),
+    amount: parseFloat(document.getElementById('s-amount').value) || 0,
+    remark: document.getElementById('s-remark').value.trim(),
+    files: selectedFiles.map(f => ({ name: f.name, type: f.type, size: f.size })),
+    salesId: u.id, salesName: u.name, branch: u.branch,
+    submitDate: today,
+    status: 'pending',
+    clerkId: null, clerkName: null, approveDate: null, remarks: [],
+    history: [{ date: today + ' ' + new Date().toTimeString().slice(0,5), user: u.name, action: 'ส่งเอกสาร' }]
+  };
+
+  DOCUMENTS.push(newDoc);
+
+  // Reset form
+  document.getElementById('s-booking').value = '';
+  document.getElementById('s-model').value = '';
+  document.getElementById('s-customer').value = '';
+  document.getElementById('s-plate').value = '';
+  document.getElementById('s-campaign-name').value = '';
+  document.getElementById('s-amount').value = '';
+  document.getElementById('s-remark').value = '';
+  selectedFiles = [];
+  renderFileList();
+  document.querySelectorAll('#campaign-checks input').forEach(i => i.checked = false);
+  populateRequiredDocs();
+
+  document.getElementById('submit-success-msg').classList.remove('hidden');
+  setTimeout(() => document.getElementById('submit-success-msg').classList.add('hidden'), 4000);
+
+  showToast('✅ ส่งเอกสารสำเร็จ! เลขที่ ' + newId, 'success');
+}
+
+// =========================================
+// VERIFY / APPROVE
+// =========================================
+function openVerifyModal(docId) {
+  APP.editingDocId = docId;
+  const doc = DOCUMENTS.find(d => d.id === docId);
+  if (!doc) return;
+
+  const requiredDocs = getRequiredDocs(doc.campaigns);
+  let checklistHTML = `
+    <div style="background:var(--gray-100); border-radius:8px; padding:1rem; margin-bottom:1rem; font-size:0.85rem">
+      <strong>${doc.id}</strong> — ${doc.customer} — ${doc.model}<br>
+      <span style="color:var(--gray-600)">ยอดเบิก: ${doc.amount > 0 ? doc.amount.toLocaleString() + ' ฿' : '-'}</span>
+    </div>
+    <p style="font-size:0.85rem; font-weight:600; color:var(--gray-700); margin-bottom:0.5rem">ตรวจสอบเอกสารแนบ:</p>
+    <ul class="checklist">
+  `;
+
+  requiredDocs.forEach((item, i) => {
+    const hasFile = doc.files.length > i;
+    checklistHTML += `<li>
+      <div class="check-status ${hasFile ? 'check-ok' : 'check-no'}">${hasFile ? '✓' : '✗'}</div>
+      <span style="flex:1">${item}</span>
+      <span class="badge ${hasFile ? 'badge-success' : 'badge-danger'}">${hasFile ? 'มีไฟล์' : 'ไม่มีไฟล์'}</span>
+    </li>`;
+  });
+  checklistHTML += `</ul>`;
+
+  document.getElementById('modal-verify-content').innerHTML = checklistHTML;
+  document.getElementById('verify-remark').value = '';
+  document.getElementById('modal-verify').classList.add('active');
+}
+
+function approveDoc() {
+  const docId = APP.editingDocId;
+  const doc = DOCUMENTS.find(d => d.id === docId);
+  if (!doc) return;
+
+  const u = APP.currentUser;
+  const now = new Date().toISOString().replace('T',' ').slice(0,16);
+  const remark = document.getElementById('verify-remark').value.trim();
+
+  doc.status = 'approved';
+  doc.clerkId = u.id;
+  doc.clerkName = u.name;
+  doc.approveDate = now.split(' ')[0];
+  doc.history.push({ date: now, user: u.name, action: 'อนุมัติเอกสาร' + (remark ? ' - ' + remark : '') });
+
+  closeModal('modal-verify');
+  showToast('✅ อนุมัติเอกสาร ' + docId + ' แล้ว', 'success');
+  renderVerifyDocs();
+}
+
+function requestEdit() {
+  const docId = APP.editingDocId;
+  const doc = DOCUMENTS.find(d => d.id === docId);
+  if (!doc) return;
+
+  const remark = document.getElementById('verify-remark').value.trim();
+  if (!remark) {
+    showToast('กรุณาระบุเหตุผลในการส่งคืน', 'warning');
+    return;
+  }
+
+  const u = APP.currentUser;
+  const now = new Date().toISOString().replace('T',' ').slice(0,16);
+
+  doc.status = 'rejected';
+  doc.clerkId = u.id;
+  doc.clerkName = u.name;
+  if (!doc.remarks) doc.remarks = [];
+  doc.remarks.push(remark);
+  doc.history.push({ date: now, user: u.name, action: 'ส่งคืนแก้ไข - ' + remark });
+
+  closeModal('modal-verify');
+  showToast('📝 ส่งคืนแก้ไข ' + docId, 'warning');
+  renderVerifyDocs();
+}
+
+function resubmit(docId) {
+  const doc = DOCUMENTS.find(d => d.id === docId);
+  if (!doc) return;
+  doc.status = 'pending';
+  doc.history.push({ date: new Date().toISOString().replace('T',' ').slice(0,16), user: APP.currentUser.name, action: 'ส่งเอกสารใหม่หลังแก้ไข' });
+  showToast('📤 ส่งเอกสารใหม่แล้ว', 'success');
+  renderMyDocs();
+}
+
+// =========================================
+// USER MANAGEMENT
+// =========================================
+function renderUsers() {
+  const search = (document.getElementById('usr-search')?.value || '').toLowerCase();
+  const rf = document.getElementById('usr-role')?.value || '';
+  const af = document.getElementById('usr-active')?.value || '';
+
+  const filtered = USERS.filter(u =>
+    u.id !== 'u1' || true // show all
+  ).filter(u =>
+    (!rf || u.role === rf) &&
+    (!af || (af === 'active' ? u.active : !u.active)) &&
+    (!search || u.name.toLowerCase().includes(search) || u.username.toLowerCase().includes(search))
+  );
+
+  document.getElementById('users-tbody').innerHTML = filtered.map(u => `
+    <tr>
+      <td><strong>${u.name}</strong></td>
+      <td><code style="background:var(--gray-100); padding:2px 6px; border-radius:4px; font-size:0.8rem">${u.username}</code></td>
+      <td>
+        <span class="role-tag ${u.role === 'admin' ? 'role-admin' : u.role === 'clerk' ? 'role-clerk' : 'role-sales'}">
+          ${u.role === 'admin' ? 'Admin' : u.role === 'clerk' ? 'ธุรการ' : 'ที่ปรึกษา'}
+        </span>
+      </td>
+      <td>${u.branch}</td>
+      <td>${u.phone || '-'}</td>
+      <td>${u.startDate}</td>
+      <td><span class="badge ${u.active ? 'badge-success' : 'badge-gray'}">${u.active ? 'ใช้งานอยู่' : 'ปิดการใช้งาน'}</span></td>
+      <td>
+        <button class="btn btn-sm btn-outline" onclick="showEditUserModal('${u.id}')">แก้ไข</button>
+        <button class="btn btn-sm ${u.active ? 'btn-danger' : 'btn-success'}" onclick="toggleUser('${u.id}')" style="margin-left:4px">
+          ${u.active ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function showAddUserModal() {
+  APP.editingUserId = null;
+  document.getElementById('modal-user-title').textContent = 'เพิ่มผู้ใช้ใหม่';
+  document.getElementById('u-id').value = '';
+  document.getElementById('u-name').value = '';
+  document.getElementById('u-username').value = '';
+  document.getElementById('u-pass').value = '';
+  document.getElementById('u-role').value = 'sales';
+  document.getElementById('u-phone').value = '';
+  document.getElementById('u-startdate').value = new Date().toISOString().split('T')[0];
+  populateBranchSelect('u-branch');
+  document.getElementById('modal-user').classList.add('active');
+}
+
+function showEditUserModal(userId) {
+  const u = USERS.find(x => x.id === userId);
+  if (!u) return;
+  APP.editingUserId = userId;
+  document.getElementById('modal-user-title').textContent = 'แก้ไขข้อมูลผู้ใช้';
+  document.getElementById('u-id').value = userId;
+  document.getElementById('u-name').value = u.name;
+  document.getElementById('u-username').value = u.username;
+  document.getElementById('u-pass').value = u.password;
+  document.getElementById('u-role').value = u.role;
+  document.getElementById('u-phone').value = u.phone || '';
+  document.getElementById('u-startdate').value = u.startDate;
+  populateBranchSelect('u-branch', u.branch);
+  document.getElementById('modal-user').classList.add('active');
+}
+
+function saveUser() {
+  const name = document.getElementById('u-name').value.trim();
+  const username = document.getElementById('u-username').value.trim();
+  const pass = document.getElementById('u-pass').value;
+  const role = document.getElementById('u-role').value;
+  const branch = document.getElementById('u-branch').value;
+
+  if (!name || !username || !pass || !role || !branch) {
+    showToast('กรุณากรอกข้อมูลให้ครบ', 'warning');
+    return;
+  }
+
+  const id = document.getElementById('u-id').value;
+  if (id) {
+    const u = USERS.find(x => x.id === id);
+    if (u) {
+      u.name = name; u.username = username; u.password = pass;
+      u.role = role; u.branch = branch;
+      u.phone = document.getElementById('u-phone').value.trim();
+      u.startDate = document.getElementById('u-startdate').value;
+    }
+    showToast('✅ แก้ไขข้อมูลผู้ใช้แล้ว', 'success');
+  } else {
+    if (USERS.find(x => x.username === username)) {
+      showToast('Username นี้มีอยู่แล้ว', 'danger');
+      return;
+    }
+    USERS.push({
+      id: 'u' + (USERS.length + 1),
+      username, password: pass, name, role, branch,
+      phone: document.getElementById('u-phone').value.trim(),
+      startDate: document.getElementById('u-startdate').value,
+      active: true
+    });
+    showToast('✅ เพิ่มผู้ใช้ใหม่แล้ว', 'success');
+  }
+
+  closeModal('modal-user');
+  renderUsers();
+}
+
+function toggleUser(userId) {
+  const u = USERS.find(x => x.id === userId);
+  if (!u) return;
+  if (u.id === APP.currentUser.id) { showToast('ไม่สามารถปิดการใช้งานตัวเองได้', 'danger'); return; }
+  u.active = !u.active;
+  showToast(u.active ? '✅ เปิดการใช้งานแล้ว' : '🚫 ปิดการใช้งานแล้ว', u.active ? 'success' : 'warning');
+  renderUsers();
+}
+
+// =========================================
+// REPORTS
+// =========================================
+function renderReports() {
+  const docs = DOCUMENTS;
+  const totalAmount = docs.filter(d => d.status === 'approved').reduce((s, d) => s + d.amount, 0);
+
+  document.getElementById('report-stats').innerHTML = `
+    <div class="stat-card stat-blue"><div class="stat-label">รวมเอกสารทั้งหมด</div><div class="stat-value">${docs.length}</div></div>
+    <div class="stat-card stat-green"><div class="stat-label">อนุมัติแล้ว</div><div class="stat-value">${docs.filter(d=>d.status==='approved').length}</div></div>
+    <div class="stat-card stat-amber"><div class="stat-label">รอตรวจสอบ</div><div class="stat-value">${docs.filter(d=>['pending','checking'].includes(d.status)).length}</div></div>
+    <div class="stat-card stat-green"><div class="stat-label">ยอดเบิกอนุมัติ</div><div class="stat-value" style="font-size:1.3rem">${totalAmount.toLocaleString()}</div><div class="stat-sub">บาท</div></div>
+  `;
+
+  // By branch
+  const byBranch = {};
+  docs.forEach(d => { byBranch[d.branch] = (byBranch[d.branch] || 0) + 1; });
+  const sortedBranch = Object.entries(byBranch).sort((a,b) => b[1]-a[1]);
+  const maxB = sortedBranch[0]?.[1] || 1;
+  document.getElementById('report-by-branch').innerHTML = sortedBranch.map(([b, n]) =>
+    `<div style="margin-bottom:0.6rem">
+      <div style="display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:3px">
+        <span>${b}</span><strong>${n}</strong>
+      </div>
+      <div style="background:var(--gray-200); border-radius:4px; height:8px">
+        <div style="background:var(--primary); height:8px; border-radius:4px; width:${Math.round(n/maxB*100)}%"></div>
+      </div>
+    </div>`
+  ).join('');
+
+  // By type
+  const byType = {};
+  docs.forEach(d => { d.campaigns.forEach(c => { byType[c] = (byType[c] || 0) + 1; }); });
+  const sortedType = Object.entries(byType).sort((a,b) => b[1]-a[1]);
+  const maxT = sortedType[0]?.[1] || 1;
+  document.getElementById('report-by-type').innerHTML = sortedType.map(([t, n]) =>
+    `<div style="margin-bottom:0.6rem">
+      <div style="display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:3px">
+        <span>${getCampaignLabel(t)}</span><strong>${n}</strong>
+      </div>
+      <div style="background:var(--gray-200); border-radius:4px; height:8px">
+        <div style="background:var(--accent); height:8px; border-radius:4px; width:${Math.round(n/maxT*100)}%"></div>
+      </div>
+    </div>`
+  ).join('');
+}
+
+// =========================================
+// HELPERS
+// =========================================
+function populateBranchFilters() {
+  ['v-branch','all-branch'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      BRANCHES.forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b; opt.textContent = b;
+        el.appendChild(opt);
+      });
+    }
+  });
+}
+
+function populateBranchSelect(id, selected) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = BRANCHES.map(b => `<option value="${b}" ${b === selected ? 'selected' : ''}>${b}</option>`).join('');
+}
+
+function populateTypeFilter() {
+  const el = document.getElementById('v-type');
+  if (!el) return;
+  CAMPAIGN_TYPES.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id; opt.textContent = c.label;
+    el.appendChild(opt);
+  });
+}
+
+function getCampaignLabel(id) {
+  const c = CAMPAIGN_TYPES.find(x => x.id === id);
+  return c ? c.label.split('(')[0].trim() : id;
+}
+
+function getCampaignTag(id) {
+  const c = CAMPAIGN_TYPES.find(x => x.id === id);
+  return c ? c.tag : 'ct-other';
+}
+
+function statusBadge(status) {
+  const map = {
+    'pending': ['badge-warning', 'รอตรวจสอบ'],
+    'checking': ['badge-info', 'กำลังตรวจสอบ'],
+    'approved': ['badge-success', '✓ อนุมัติแล้ว'],
+    'rejected': ['badge-danger', '✗ ส่งคืนแก้ไข'],
+  };
+  const [cls, label] = map[status] || ['badge-gray', status];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function showToast(msg, type = 'success') {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast-' + type;
+  toast.style.display = 'block';
+  setTimeout(() => { toast.style.display = 'none'; }, 3000);
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+function showImg(filename) {
+  document.getElementById('modal-image').classList.add('active');
+}
+
+function showNewDocModal() { showView('view-submit'); }
+</script>
+</body>
+</html>
