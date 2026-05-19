@@ -1077,8 +1077,10 @@
 
 <script>
 // =========================================
-// DATA STORE
+// DATA STORE + GOOGLE SHEETS API
 // =========================================
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbx1ToX8yC2LWj3y1_X3lsCOdU8usYTZchiFz8g_b1nYDcSw39jBiGwCyZLpY_hevGMVwQ/exec';
+
 const APP = {
   currentUser: null,
   prevView: null,
@@ -1109,73 +1111,80 @@ const REQUIRED_DOCS_MAP = {
   other: ['เอกสารที่เกี่ยวข้อง (ตามที่ระบุ)'],
 };
 
-// DEFAULT USERS
-let USERS = [
-  { id:'u1', username:'admin', password:'admin123', name:'นายชนะ สุขมาก', role:'admin', branch:'สาขาระยอง', phone:'038-000001', startDate:'2010-01-01', active:true },
-  { id:'u2', username:'clerk', password:'clerk123', name:'นางสาวพิมพ์ใจ รักดี', role:'clerk', branch:'สาขาระยอง', phone:'038-000002', startDate:'2018-03-15', active:true },
-  { id:'u3', username:'sales1', password:'sales123', name:'นายสมชาย ใจดี', role:'sales', branch:'สาขาระยอง', phone:'089-111111', startDate:'2020-06-01', active:true },
-  { id:'u4', username:'sales2', password:'sales456', name:'นางสาวจิราพร มีสุข', role:'sales', branch:'สาขาปลวกแดง', phone:'089-222222', startDate:'2021-09-15', active:true },
-  { id:'u5', username:'sales3', password:'sales789', name:'นายอนุชา ชนะชัย', role:'sales', branch:'สาขานิคมพัฒนา', phone:'089-333333', startDate:'2022-01-10', active:false },
-];
+let USERS = [];
+let DOCUMENTS = [];
 
-// SAMPLE DOCUMENTS
-let DOCUMENTS = [
-  {
-    id:'DOC-2024-001', bookingNo:'BK-2024-001', model:'D-MAX 1.9 Ddi Hi-Lander', customer:'นายสมบัติ เพชรดี', plate:'กข 1234 ชลบุรี',
-    campaigns:['tri'], campaignName:'สุขยกตระกูล', amount:15000, remark:'ลูกค้าขอส่วนลดพิเศษ',
-    files:[{name:'booking.pdf', type:'pdf', size:'1.2MB'},{name:'id_card.jpg', type:'jpg', size:'0.5MB'}],
-    salesId:'u3', salesName:'นายสมชาย ใจดี', branch:'สาขาระยอง',
-    submitDate:'2024-12-10', status:'approved', clerkId:'u2', clerkName:'นางสาวพิมพ์ใจ รักดี',
-    approveDate:'2024-12-11', remarks:[],
-    history:[
-      {date:'2024-12-10 09:30', user:'นายสมชาย ใจดี', action:'ส่งเอกสาร'},
-      {date:'2024-12-10 14:00', user:'นางสาวพิมพ์ใจ รักดี', action:'รับเรื่อง กำลังตรวจสอบ'},
-      {date:'2024-12-11 10:15', user:'นางสาวพิมพ์ใจ รักดี', action:'อนุมัติเอกสาร'},
-    ]
-  },
-  {
-    id:'DOC-2024-002', bookingNo:'BK-2024-002', model:'MU-X 1.9 DDi', customer:'นางมาลี สุขใจ', plate:'',
-    campaigns:['wrap','acc'], campaignName:'โปร Accessories ฟรี', amount:25000, remark:'',
-    files:[{name:'booking_002.pdf', type:'pdf', size:'0.9MB'}],
-    salesId:'u4', salesName:'นางสาวจิราพร มีสุข', branch:'สาขาปลวกแดง',
-    submitDate:'2024-12-12', status:'checking', clerkId:'u2', clerkName:'นางสาวพิมพ์ใจ รักดี',
-    approveDate:null, remarks:[],
-    history:[
-      {date:'2024-12-12 08:45', user:'นางสาวจิราพร มีสุข', action:'ส่งเอกสาร'},
-      {date:'2024-12-12 13:00', user:'นางสาวพิมพ์ใจ รักดี', action:'รับเรื่อง กำลังตรวจสอบ'},
-    ]
-  },
-  {
-    id:'DOC-2024-003', bookingNo:'BK-2024-003', model:'D-MAX 3.0 Ddi 4x4', customer:'นายวิชัย กล้าหาญ', plate:'',
-    campaigns:['tri'], campaignName:'ฟรีค่าดอกเบี้ย 3 เดือน', amount:8500, remark:'',
-    files:[],
-    salesId:'u3', salesName:'นายสมชาย ใจดี', branch:'สาขาระยอง',
-    submitDate:'2024-12-13', status:'pending', clerkId:null, clerkName:null,
-    approveDate:null, remarks:[],
-    history:[
-      {date:'2024-12-13 10:00', user:'นายสมชาย ใจดี', action:'ส่งเอกสาร'},
-    ]
-  },
-  {
-    id:'DOC-2024-004', bookingNo:'BK-2024-004', model:'Trooper 2.8 DDi', customer:'นางสาวกนกพร ดีใจ', plate:'ขจ 5678 ระยอง',
-    campaigns:['trade'], campaignName:'Trade-in เพิ่มราคา', amount:30000, remark:'Trade-in รถเก่า',
-    files:[{name:'trade_docs.pdf', type:'pdf', size:'2.1MB'}],
-    salesId:'u4', salesName:'นางสาวจิราพร มีสุข', branch:'สาขาปลวกแดง',
-    submitDate:'2024-12-11', status:'rejected', clerkId:'u2', clerkName:'นางสาวพิมพ์ใจ รักดี',
-    approveDate:null, remarks:['เอกสารไม่ครบ - ต้องการใบโอนกรรมสิทธิ์ตัวจริง'],
-    history:[
-      {date:'2024-12-11 11:00', user:'นางสาวจิราพร มีสุข', action:'ส่งเอกสาร'},
-      {date:'2024-12-12 09:00', user:'นางสาวพิมพ์ใจ รักดี', action:'ส่งคืนแก้ไข - เอกสารไม่ครบ'},
-    ]
-  },
-];
+// =========================================
+// API HELPERS
+// =========================================
+async function apiCall(params) {
+  const url = GAS_URL + '?' + new URLSearchParams(params).toString();
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    return data;
+  } catch(e) {
+    console.error('API Error:', e);
+    return { error: e.toString() };
+  }
+}
+
+async function loadUsers() {
+  showLoading('กำลังโหลดข้อมูลผู้ใช้...');
+  const res = await apiCall({ action: 'getUsers' });
+  hideLoading();
+  if (res.users) USERS = res.users;
+}
+
+async function loadDocuments() {
+  showLoading('กำลังโหลดเอกสาร...');
+  const res = await apiCall({ action: 'getDocs' });
+  hideLoading();
+  if (res.documents) DOCUMENTS = res.documents;
+}
+
+async function apiSaveUser(data) {
+  return await apiCall({ action: 'saveUser', data: JSON.stringify(data) });
+}
+
+async function apiToggleUser(id) {
+  return await apiCall({ action: 'toggleUser', id });
+}
+
+async function apiSaveDoc(data) {
+  return await apiCall({ action: 'saveDoc', data: JSON.stringify(data) });
+}
+
+function showLoading(msg) {
+  let el = document.getElementById('loading-overlay');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'loading-overlay';
+    el.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,0.85);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-family:Sarabun,sans-serif;font-size:1rem;color:#1a3c6e;';
+    el.innerHTML = '<div style="width:40px;height:40px;border:4px solid #e9ecef;border-top-color:#1a3c6e;border-radius:50%;animation:spin 0.8s linear infinite"></div><span id="loading-msg"></span><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+    document.body.appendChild(el);
+  }
+  document.getElementById('loading-msg').textContent = msg || 'กำลังโหลด...';
+  el.style.display = 'flex';
+}
+
+function hideLoading() {
+  const el = document.getElementById('loading-overlay');
+  if (el) el.style.display = 'none';
+}
 
 // =========================================
 // AUTH
 // =========================================
-function doLogin() {
+async function doLogin() {
   const u = document.getElementById('login-user').value.trim();
   const p = document.getElementById('login-pass').value;
+  if (!u || !p) { document.getElementById('login-error').classList.remove('hidden'); return; }
+
+  showLoading('กำลังตรวจสอบ...');
+  await loadUsers();
+  hideLoading();
+
   const user = USERS.find(x => x.username === u && x.password === p && x.active);
   if (!user) {
     document.getElementById('login-error').classList.remove('hidden');
@@ -1197,7 +1206,7 @@ function doLogout() {
 // =========================================
 // INIT APP
 // =========================================
-function initApp() {
+async function initApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').classList.add('active');
 
@@ -1212,6 +1221,8 @@ function initApp() {
   populateCampaignChecks();
   populateTypeFilter();
   populateRequiredDocs();
+
+  await loadDocuments();
 
   if (u.role === 'sales') showView('view-dashboard');
   else showView('view-verify');
@@ -1617,7 +1628,7 @@ function formatFileSize(bytes) {
   return (bytes/1024/1024).toFixed(1) + 'MB';
 }
 
-function submitDocument() {
+async function submitDocument() {
   const booking = document.getElementById('s-booking').value.trim();
   const model = document.getElementById('s-model').value.trim();
   const customer = document.getElementById('s-customer').value.trim();
@@ -1635,6 +1646,7 @@ function submitDocument() {
   const u = APP.currentUser;
   const newId = 'DOC-' + new Date().getFullYear() + '-' + String(DOCUMENTS.length + 1).padStart(3, '0');
   const today = new Date().toISOString().split('T')[0];
+  const now = today + ' ' + new Date().toTimeString().slice(0,5);
 
   const newDoc = {
     id: newId,
@@ -1650,13 +1662,21 @@ function submitDocument() {
     salesId: u.id, salesName: u.name, branch: u.branch,
     submitDate: today,
     status: 'pending',
-    clerkId: null, clerkName: null, approveDate: null, remarks: [],
-    history: [{ date: today + ' ' + new Date().toTimeString().slice(0,5), user: u.name, action: 'ส่งเอกสาร' }]
+    clerkId: '', clerkName: '', approveDate: '', remarks: [],
+    history: [{ date: now, user: u.name, action: 'ส่งเอกสาร' }]
   };
+
+  showLoading('กำลังบันทึกเอกสาร...');
+  const res = await apiSaveDoc(newDoc);
+  hideLoading();
+
+  if (res.error) {
+    showToast('เกิดข้อผิดพลาด: ' + res.error, 'danger');
+    return;
+  }
 
   DOCUMENTS.push(newDoc);
 
-  // Reset form
   document.getElementById('s-booking').value = '';
   document.getElementById('s-model').value = '';
   document.getElementById('s-customer').value = '';
@@ -1671,7 +1691,6 @@ function submitDocument() {
 
   document.getElementById('submit-success-msg').classList.remove('hidden');
   setTimeout(() => document.getElementById('submit-success-msg').classList.add('hidden'), 4000);
-
   showToast('✅ ส่งเอกสารสำเร็จ! เลขที่ ' + newId, 'success');
 }
 
@@ -1708,7 +1727,7 @@ function openVerifyModal(docId) {
   document.getElementById('modal-verify').classList.add('active');
 }
 
-function approveDoc() {
+async function approveDoc() {
   const docId = APP.editingDocId;
   const doc = DOCUMENTS.find(d => d.id === docId);
   if (!doc) return;
@@ -1723,12 +1742,18 @@ function approveDoc() {
   doc.approveDate = now.split(' ')[0];
   doc.history.push({ date: now, user: u.name, action: 'อนุมัติเอกสาร' + (remark ? ' - ' + remark : '') });
 
+  showLoading('กำลังบันทึก...');
+  const res = await apiSaveDoc(doc);
+  hideLoading();
+
+  if (res.error) { showToast('เกิดข้อผิดพลาด: ' + res.error, 'danger'); return; }
+
   closeModal('modal-verify');
   showToast('✅ อนุมัติเอกสาร ' + docId + ' แล้ว', 'success');
   renderVerifyDocs();
 }
 
-function requestEdit() {
+async function requestEdit() {
   const docId = APP.editingDocId;
   const doc = DOCUMENTS.find(d => d.id === docId);
   if (!doc) return;
@@ -1749,16 +1774,26 @@ function requestEdit() {
   doc.remarks.push(remark);
   doc.history.push({ date: now, user: u.name, action: 'ส่งคืนแก้ไข - ' + remark });
 
+  showLoading('กำลังบันทึก...');
+  const res = await apiSaveDoc(doc);
+  hideLoading();
+
+  if (res.error) { showToast('เกิดข้อผิดพลาด: ' + res.error, 'danger'); return; }
+
   closeModal('modal-verify');
   showToast('📝 ส่งคืนแก้ไข ' + docId, 'warning');
   renderVerifyDocs();
 }
 
-function resubmit(docId) {
+async function resubmit(docId) {
   const doc = DOCUMENTS.find(d => d.id === docId);
   if (!doc) return;
+  const now = new Date().toISOString().replace('T',' ').slice(0,16);
   doc.status = 'pending';
-  doc.history.push({ date: new Date().toISOString().replace('T',' ').slice(0,16), user: APP.currentUser.name, action: 'ส่งเอกสารใหม่หลังแก้ไข' });
+  doc.history.push({ date: now, user: APP.currentUser.name, action: 'ส่งเอกสารใหม่หลังแก้ไข' });
+  showLoading('กำลังบันทึก...');
+  await apiSaveDoc(doc);
+  hideLoading();
   showToast('📤 ส่งเอกสารใหม่แล้ว', 'success');
   renderMyDocs();
 }
@@ -1766,7 +1801,8 @@ function resubmit(docId) {
 // =========================================
 // USER MANAGEMENT
 // =========================================
-function renderUsers() {
+async function renderUsers() {
+  if (USERS.length === 0) await loadUsers();
   const search = (document.getElementById('usr-search')?.value || '').toLowerCase();
   const rf = document.getElementById('usr-role')?.value || '';
   const af = document.getElementById('usr-active')?.value || '';
@@ -1832,7 +1868,7 @@ function showEditUserModal(userId) {
   document.getElementById('modal-user').classList.add('active');
 }
 
-function saveUser() {
+async function saveUser() {
   const name = document.getElementById('u-name').value.trim();
   const username = document.getElementById('u-username').value.trim();
   const pass = document.getElementById('u-pass').value;
@@ -1845,40 +1881,44 @@ function saveUser() {
   }
 
   const id = document.getElementById('u-id').value;
-  if (id) {
-    const u = USERS.find(x => x.id === id);
-    if (u) {
-      u.name = name; u.username = username; u.password = pass;
-      u.role = role; u.branch = branch;
-      u.phone = document.getElementById('u-phone').value.trim();
-      u.startDate = document.getElementById('u-startdate').value;
-    }
-    showToast('✅ แก้ไขข้อมูลผู้ใช้แล้ว', 'success');
-  } else {
-    if (USERS.find(x => x.username === username)) {
-      showToast('Username นี้มีอยู่แล้ว', 'danger');
-      return;
-    }
-    USERS.push({
-      id: 'u' + (USERS.length + 1),
-      username, password: pass, name, role, branch,
-      phone: document.getElementById('u-phone').value.trim(),
-      startDate: document.getElementById('u-startdate').value,
-      active: true
-    });
-    showToast('✅ เพิ่มผู้ใช้ใหม่แล้ว', 'success');
+  const userData = {
+    id: id || 'u' + Date.now(),
+    name, username, password: pass, role, branch,
+    phone: document.getElementById('u-phone').value.trim(),
+    startDate: document.getElementById('u-startdate').value,
+    active: true
+  };
+
+  if (!id && USERS.find(x => x.username === username)) {
+    showToast('Username นี้มีอยู่แล้ว', 'danger');
+    return;
   }
 
+  showLoading('กำลังบันทึก...');
+  const res = await apiSaveUser(userData);
+  hideLoading();
+
+  if (res.error) { showToast('เกิดข้อผิดพลาด: ' + res.error, 'danger'); return; }
+
+  await loadUsers();
+  showToast(id ? '✅ แก้ไขข้อมูลผู้ใช้แล้ว' : '✅ เพิ่มผู้ใช้ใหม่แล้ว', 'success');
   closeModal('modal-user');
   renderUsers();
 }
 
-function toggleUser(userId) {
+async function toggleUser(userId) {
   const u = USERS.find(x => x.id === userId);
   if (!u) return;
   if (u.id === APP.currentUser.id) { showToast('ไม่สามารถปิดการใช้งานตัวเองได้', 'danger'); return; }
-  u.active = !u.active;
-  showToast(u.active ? '✅ เปิดการใช้งานแล้ว' : '🚫 ปิดการใช้งานแล้ว', u.active ? 'success' : 'warning');
+
+  showLoading('กำลังอัปเดต...');
+  const res = await apiToggleUser(userId);
+  hideLoading();
+
+  if (res.error) { showToast('เกิดข้อผิดพลาด: ' + res.error, 'danger'); return; }
+
+  await loadUsers();
+  showToast(res.active ? '✅ เปิดการใช้งานแล้ว' : '🚫 ปิดการใช้งานแล้ว', res.active ? 'success' : 'warning');
   renderUsers();
 }
 
